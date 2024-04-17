@@ -12,6 +12,7 @@ type Repository struct {
 	Env      string   `json:"env"`
 	RESTPort int      `json:"rest_port"`
 	DB       Database `json:"database"`
+	Secret   string   `json:"secret"`
 }
 
 func Default() *Repository {
@@ -26,6 +27,7 @@ func Default() *Repository {
 			DBName:       "players",
 			RestartCount: 10,
 		},
+		Secret: "1234",
 	}
 }
 

@@ -2,7 +2,9 @@ package api
 
 import (
 	"database/sql"
+	"iGaming/config"
 	"iGaming/internal/api/controllers"
+	"iGaming/internal/api/helpers"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,12 +16,8 @@ type Routes struct {
 	OpenApiGames controllers.OpenApiGames
 }
 
-func (r *Routes) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewRoutes(db *sql.DB) *Routes {
+func NewRoutes(db *sql.DB, cfg *config.Repository) *Routes {
+	helpers.Secret = cfg.Secret
 	return &Routes{
 		OpenApiGames: controllers.NewOpenApiGames(db),
 	}
@@ -27,11 +25,11 @@ func NewRoutes(db *sql.DB) *Routes {
 
 func (r *Routes) Routes() http.Handler {
 	mux := chi.NewRouter()
-	//cors
+
 	mux.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://*", "https://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "Sign"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
 		MaxAge:           300,
@@ -39,7 +37,9 @@ func (r *Routes) Routes() http.Handler {
 
 	mux.Use(middleware.Heartbeat("/healthCheck"))
 
-	mux.Get("/games-processor", r.OpenApiGames.GameProcessor)
+	mux.Route("/api/v1", func(c chi.Router) {
+		c.Post("/games", r.OpenApiGames.GameProcessor)
+	})
 
 	return mux
 }

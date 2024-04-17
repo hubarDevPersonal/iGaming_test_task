@@ -3,6 +3,7 @@ package helpers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -13,21 +14,29 @@ type JsonResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-func ReadJSON(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func ReadJSON(w http.ResponseWriter, r *http.Request, data interface{}) (string, error) {
 	maxBytes := 1048576
 
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 	dec := json.NewDecoder(r.Body)
+
 	err := dec.Decode(data)
 	if err != nil {
-		return err
-	}
-	err = dec.Decode(&struct{}{})
-	if err != io.EOF {
-		return errors.New("body must only have a single JSON value")
+		return "", err
 	}
 
-	return nil
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF && err != nil {
+		return "", errors.New("body must only have a single JSON value")
+	}
+	rawJSON, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(string(rawJSON))
+
+	return string(rawJSON), nil
 }
 
 func (res *JsonResponse) WriteJSON(w http.ResponseWriter, status int, headers ...http.Header) error {

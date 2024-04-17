@@ -17,7 +17,7 @@ func main() {
 		log.Fatal("Cannot connect to DB")
 	}
 
-	app := NewApp(nil)
+	app := NewApp(db, cfg)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.RESTPort),
