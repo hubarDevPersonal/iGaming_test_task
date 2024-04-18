@@ -16,6 +16,6 @@ func (b *Balance) ConvertWalletToBalance(wallet *models.Balance) {
 	b.Currency = wallet.Currency
 	b.Balance = wallet.Balance
 	b.MaxWin = wallet.MaxWin
-	b.Denomination = int64(wallet.Denomination) // Ensure type compatibility
+	b.Denomination = int64(wallet.Denomination)
 	b.GameSessionID = wallet.GameSessionID
 }
